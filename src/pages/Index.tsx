@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,6 +17,7 @@ interface Transaction {
 }
 
 const Index = () => {
+  const { toast } = useToast();
   const [activeSection, setActiveSection] = useState<'home' | 'transfer' | 'profile'>('home');
   const [balance, setBalance] = useState(125340);
   const [transactions, setTransactions] = useState<Transaction[]>([
@@ -247,7 +249,15 @@ const Index = () => {
                       </div>
                     </div>
 
-                    <Button className="w-full h-12 text-lg">
+                    <Button 
+                      className="w-full h-12 text-lg"
+                      onClick={() => {
+                        toast({
+                          title: "Успешно ✅",
+                          description: "Перевод успешно отправлен",
+                        });
+                      }}
+                    >
                       <Icon name="Send" size={20} className="mr-2" />
                       Отправить перевод
                     </Button>
