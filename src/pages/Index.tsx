@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -7,8 +7,64 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import Icon from '@/components/ui/icon';
 
+interface Transaction {
+  id: string;
+  sender: string;
+  amount: number;
+  date: string;
+  time: string;
+}
+
 const Index = () => {
   const [activeSection, setActiveSection] = useState<'home' | 'transfer' | 'profile'>('home');
+  const [balance, setBalance] = useState(125340);
+  const [transactions, setTransactions] = useState<Transaction[]>([
+    {
+      id: '1',
+      sender: 'Алексей Сидоров',
+      amount: 5000,
+      date: '15.02.2026',
+      time: '14:30'
+    },
+    {
+      id: '2',
+      sender: 'ООО "Компания"',
+      amount: 25000,
+      date: '14.02.2026',
+      time: '09:15'
+    }
+  ]);
+
+  const names = [
+    'Анна Петрова', 'Михаил Иванов', 'Елена Сидорова', 'Дмитрий Козлов',
+    'Ольга Смирнова', 'Александр Попов', 'Мария Новикова', 'Игорь Волков',
+    'Татьяна Соколова', 'Андрей Морозов', 'Наталья Федорова', 'Сергей Орлов',
+    'ООО "Бизнес"', 'ИП Константинов', 'АО "Финансы"', 'Группа Компаний',
+    'Павел Лебедев', 'Виктория Егорова', 'Николай Васильев', 'Юлия Павлова'
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const randomAmount = Math.floor(Math.random() * (1000000000 - 50 + 1)) + 50;
+      const randomName = names[Math.floor(Math.random() * names.length)];
+      const now = new Date();
+      const date = now.toLocaleDateString('ru-RU');
+      const time = now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+
+      const newTransaction: Transaction = {
+        id: Date.now().toString(),
+        sender: randomName,
+        amount: randomAmount,
+        date,
+        time
+      };
+
+      setBalance(prev => prev + randomAmount);
+      setTransactions(prev => [newTransaction, ...prev].slice(0, 10));
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
@@ -223,32 +279,21 @@ const Index = () => {
 
                     <div className="border-t pt-6">
                       <h4 className="font-semibold mb-4">Последние входящие переводы</h4>
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                              <Icon name="ArrowDown" className="text-green-600" size={20} />
+                      <div className="space-y-3 max-h-96 overflow-y-auto">
+                        {transactions.map((transaction) => (
+                          <div key={transaction.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-lg animate-fade-in">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                <Icon name="ArrowDown" className="text-green-600" size={20} />
+                              </div>
+                              <div>
+                                <p className="font-medium">{transaction.sender}</p>
+                                <p className="text-sm text-slate-500">{transaction.date}, {transaction.time}</p>
+                              </div>
                             </div>
-                            <div>
-                              <p className="font-medium">Алексей Сидоров</p>
-                              <p className="text-sm text-slate-500">15.02.2026, 14:30</p>
-                            </div>
+                            <span className="font-bold text-green-600">+{transaction.amount.toLocaleString('ru-RU')} ₽</span>
                           </div>
-                          <span className="font-bold text-green-600">+5 000 ₽</span>
-                        </div>
-                        
-                        <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                              <Icon name="ArrowDown" className="text-green-600" size={20} />
-                            </div>
-                            <div>
-                              <p className="font-medium">ООО "Компания"</p>
-                              <p className="text-sm text-slate-500">14.02.2026, 09:15</p>
-                            </div>
-                          </div>
-                          <span className="font-bold text-green-600">+25 000 ₽</span>
-                        </div>
+                        ))}
                       </div>
                     </div>
                   </CardContent>
@@ -303,7 +348,7 @@ const Index = () => {
                     <CardTitle>Баланс счета</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-4xl font-bold text-primary mb-4">125 340 ₽</div>
+                    <div className="text-4xl font-bold text-primary mb-4 transition-all duration-300 animate-pulse">{balance.toLocaleString('ru-RU')} ₽</div>
                     <div className="flex gap-3">
                       <Button>
                         <Icon name="Plus" size={18} className="mr-2" />
